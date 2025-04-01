@@ -2,7 +2,7 @@
 
 export default async (app, opts) => {
   app.get("/", async (request, reply) => {
-    return { hello: "world" };
+    return { hello: "world" }; // default route, returns hello world
   });
   // Parametrized route with validation
   const opt = {
@@ -30,7 +30,7 @@ export default async (app, opts) => {
     },
   };
 
-  app.get("/hello/:name", opt, async (request, reply) => {
+  app.get("/hello/:name", opt, async (request, reply) => { 
     const { name } = request.params;
     if (name.length == 0) {
       reply.code(400);
