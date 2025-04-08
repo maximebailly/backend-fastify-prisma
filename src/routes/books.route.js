@@ -1,5 +1,71 @@
 async function booksRoute(fastify, options) {
 
+    fastify.post('/register', { schema: createUserSchema }, async (request, reply) => {
+      const { username, password } = request.body;
+      if (!username || !password) {
+        reply.code(400).send({ error: 'Username and password are required !' });
+        return;
+      }
+      const user = await fastify.prisma.user.create({
+        data: { username, password },
+      });
+
+      const id = user.id;
+      // Le connecter
+      request.session.isConnected = true;
+
+      // Stocker son id dans la session
+      request.session.id = id;
+
+      reply.code(201).send(user);
+    });
+
+    fastify.post('/login', { schema: createUserSchema }, async (request, reply) => {
+      const { username, password } = request.body;
+      if (!username || !password) {
+        reply.code(400).send({ error: 'Username and password are required !' });
+        return;
+      }
+      
+      // Si le password ne correspond pas au username indiqué
+      const user = await fastify.prisma.user.findUnique({
+        where: { username },
+      });
+      if (user.password !== password) {
+        reply.code(400).send({error : 'Mauvais nom utilisateur ou mot de passe.'})
+        return;
+      }
+
+      const id = user.id;
+      // Le connecter
+      request.session.isConnected = true;
+      
+      // Stocker son id dans la session
+      request.session.id = id;
+
+      reply.code(200).send({ message: 'Connexion réussie', user });
+    });
+
+    fastify.get('/me', async(request, reply) => {
+      if (!requireAuth(request,reply)) {
+        reply.code(400).send({error : 'Vous êtes pas connecté.'})
+        return;
+      }
+      const userID = request.session.id;
+      const user = await fastify.prisma.user.findUnique({
+        where: { userID },});
+      return user.username;
+    });
+
+    async function requireAuth(request, reply) {
+      if (!request.session || !request.session.id) {
+        reply.code(401).send({ error: 'Accès non autorisé : vous devez être connecté.' });
+        return;
+      }
+      return true;
+    }
+  
+
     fastify.get('/', async (request, reply) => {
       const books = await fastify.prisma.book.findMany();
       return books;

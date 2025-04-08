@@ -18,4 +18,22 @@ model Book {
   title     String
   author    String
   createdAt DateTime @default(now())
+  comment   Comment[]
+}
+
+model User {
+  id     Int @id @default(autoincrement())
+  username String
+  password String
+  comment   Comment[]
+}
+
+model Comment {
+  id      Int @id @default(autoincrement())
+  content String
+  createdAt DateTime @default(now())
+  userID  Int
+  bookID  Int
+  user   User   @relation(fields: [userID], references: [id])
+  book   Book   @relation(fields: [bookID], references: [id])
 }

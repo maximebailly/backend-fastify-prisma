@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalogue</title>
+</head>
+<body>
+    <h1>Catalogue des livres</h1>
+    <div id="books"></div>
+
+</body>
+<script>
+    let books = document.getElementById('books');
+
+    // Fonction asynchrone pour récupérer les données
+    async function fetchBooks() {
+        try {
+            const res = await fetch(`/books`); // Attendre la réponse de fetch
+            const books_list = await res.json(); // Attendre la conversion en JSON
+            console.log(books);
+
+            // Rentrer les livres dans le div
+            //books.innerHTML = infos.map(book => `<p>${book.title}</p>`).join('');
+            books_list.forEach(book => {
+                const {title, author} = book;
+                books.innerHTML += (`<p>- ${title}, écrit par ${author}.</p>`)
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des livres :', error);
+        }
+    }
+
+    // Appeler la fonction
+    fetchBooks();
+    
+</script>
+</html>
